@@ -2,6 +2,14 @@
 
 基于 **Vue3 + Vite** 的「人脸情绪识别 → 歌曲推荐」系统。人脸情绪识别**完全在浏览器本地完成**（@vladmandic/face-api + TensorFlow.js），不依赖任何后端；歌曲来源同时支持**本地曲库**与**在线音乐接口**。
 
+> 🌐 在线演示：<https://shiguang-du.github.io/face-emotion-music/>
+> 📦 代码仓库：<https://github.com/shiguang-du/face-emotion-music>
+
+### 部署方式（GitHub Pages）
+- `.github/workflows/deploy.yml`：push 到 `main` 后自动构建并发布到 Pages。
+- `vite.config.js` 使用相对基路径 `base: './'`，在 `/<repo>/` 子路径下资源可正确加载。
+- 首次需在仓库 Settings → Pages 中把 Source 设为 **GitHub Actions**（已自动配置）。
+
 ---
 
 ## 一、功能
