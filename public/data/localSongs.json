@@ -1,0 +1,83 @@
+{
+  "_note": "本地曲库：使用 SoundHelix 提供的 royalty-free 免费可商用试听曲（https://www.soundhelix.com）。每首歌标注了情绪特征用于推荐打分。把任意 mp3 放进 public/music 并在下方登记即可扩充本地曲库。",
+  "songs": [
+    {
+      "id": "local-1",
+      "title": "晴空 Pulse",
+      "artist": "SoundHelix",
+      "file": "/music/song-1.mp3",
+      "cover": null,
+      "energy": 0.82,
+      "valence": 0.9,
+      "danceability": 0.8,
+      "genres": ["pop", "edm"],
+      "tags": ["upbeat", "cheerful", "energetic", "欢快"],
+      "moods": ["happy", "surprised"]
+    },
+    {
+      "id": "local-2",
+      "title": "慵懒午后",
+      "artist": "SoundHelix",
+      "file": "/music/song-2.mp3",
+      "cover": null,
+      "energy": 0.4,
+      "valence": 0.55,
+      "danceability": 0.35,
+      "genres": ["lofi", "jazz", "chill"],
+      "tags": ["chill", "mellow", "lofi", "慵懒"],
+      "moods": ["neutral", "disgusted"]
+    },
+    {
+      "id": "local-3",
+      "title": "夜雨独白",
+      "artist": "SoundHelix",
+      "file": "/music/song-3.mp3",
+      "cover": null,
+      "energy": 0.25,
+      "valence": 0.2,
+      "danceability": 0.2,
+      "genres": ["ballad", "piano", "folk"],
+      "tags": ["sad", "melancholy", "slow", "伤感", "治愈"],
+      "moods": ["sad"]
+    },
+    {
+      "id": "local-4",
+      "title": "烈焰 Drive",
+      "artist": "SoundHelix",
+      "file": "/music/song-4.mp3",
+      "cover": null,
+      "energy": 0.9,
+      "valence": 0.25,
+      "danceability": 0.55,
+      "genres": ["rock", "metal", "edm"],
+      "tags": ["intense", "powerful", "angry", "燃", "气势"],
+      "moods": ["angry", "surprised"]
+    },
+    {
+      "id": "local-5",
+      "title": "静水 Ambient",
+      "artist": "SoundHelix",
+      "file": "/music/song-5.mp3",
+      "cover": null,
+      "energy": 0.3,
+      "valence": 0.4,
+      "danceability": 0.2,
+      "genres": ["ambient", "classical", "轻音乐"],
+      "tags": ["calm", "soothing", "安静", "舒缓"],
+      "moods": ["fearful", "neutral"]
+    },
+    {
+      "id": "local-6",
+      "title": "霓虹 Disco",
+      "artist": "SoundHelix",
+      "file": "/music/song-6.mp3",
+      "cover": null,
+      "energy": 0.85,
+      "valence": 0.85,
+      "danceability": 0.85,
+      "genres": ["dance", "edm", "pop"],
+      "tags": ["upbeat", "exciting", "动感", "欢快"],
+      "moods": ["happy", "surprised"]
+    }
+  ]
+}
