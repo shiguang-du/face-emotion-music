@@ -60,8 +60,6 @@
           @strategy-change="setStrategy"
           @retry-online="refreshOnline"
         />
-        <h2 class="mt">④ 播放</h2>
-        <MusicPlayer :song="currentSong" />
       </section>
     </div>
 
@@ -70,11 +68,19 @@
       推荐算法：情绪→音乐特征加权打分 ·
       歌曲：本地曲库 + 在线音乐接口
     </footer>
+
+    <!-- 吸底播放条 -->
+    <MusicPlayer
+      v-if="currentSong"
+      :song="currentSong"
+      @prev="step(-1)"
+      @next="step(1)"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import CapturePanel from './components/CapturePanel.vue'
 import EmotionResult from './components/EmotionResult.vue'
 import RecommendList from './components/RecommendList.vue'
@@ -90,6 +96,9 @@ const result = ref(null)
 const currentSong = ref(null)
 const lastRecommendEmotion = ref('')
 let recommending = false
+
+// 播放队列：在线 + 离线（与界面顺序一致，在线在前）
+const queue = computed(() => [...onlineList.value, ...localList.value])
 
 onMounted(() => {
   initModels() // 预加载模型，提升首次识别速度
@@ -138,11 +147,20 @@ function playSong(song) {
   currentSong.value = song
 }
 
+// 播放条的上/下一首：在「在线 + 离线」队列里循环切换
+function step(dir) {
+  const q = queue.value
+  if (!q.length) return
+  const i = q.findIndex((s) => s.id === currentSong.value?.id)
+  const nextIdx = i < 0 ? 0 : (i + dir + q.length) % q.length
+  currentSong.value = q[nextIdx]
+}
+
 onBeforeUnmount(() => stopLoop())
 </script>
 
 <style scoped>
-.app { max-width: 1080px; margin: 0 auto; padding: 24px 18px 40px; }
+.app { max-width: 1080px; margin: 0 auto; padding: 24px 18px 110px; }
 .top h1 { font-size: 24px; margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .top .logo {
   width: 34px; height: 34px; flex: 0 0 34px; border-radius: 11px;
