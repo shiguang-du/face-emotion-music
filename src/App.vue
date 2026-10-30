@@ -20,7 +20,7 @@
 
       <!-- 右：推荐 + 播放 -->
       <section class="card">
-        <h2>③ 歌曲推荐</h2>
+        <h2>③ 歌曲推荐 <small class="h2sub">离线曲库 + 在线接口</small></h2>
         <RecommendList
           :local-list="localList"
           :online-list="onlineList"
@@ -28,8 +28,11 @@
           :current-id="currentSong?.id || ''"
           :strategy="strategy"
           :resolved-mode="resolvedMode"
+          :online-status="onlineStatus"
+          :online-keyword="onlineKeyword"
           @play="playSong"
           @strategy-change="setStrategy"
+          @retry-online="refreshOnline"
         />
         <h2 class="mt">④ 播放</h2>
         <MusicPlayer :song="currentSong" />
@@ -55,7 +58,7 @@ import { useRecommend } from './composables/useRecommend.js'
 
 // 顶层解构，模板中 ref 自动解包
 const { modelsLoaded, loadingModels, initError, initModels, detect, startLoop, stopLoop } = useFaceEmotion()
-const { localList, onlineList, loading, error, lastEmotion, recommend, strategy, resolvedMode, setStrategy } = useRecommend()
+const { localList, onlineList, loading, error, lastEmotion, recommend, strategy, resolvedMode, setStrategy, onlineStatus, onlineKeyword, refreshOnline } = useRecommend()
 
 const result = ref(null)
 const currentSong = ref(null)
@@ -124,6 +127,7 @@ onBeforeUnmount(() => stopLoop())
   padding: 18px; box-shadow: 0 8px 30px rgba(20,30,60,.04);
 }
 .card h2 { font-size: 16px; margin: 0 0 12px; color: #2d3748; }
+.card h2 .h2sub { font-size: 12px; font-weight: 400; color: #8b93a7; margin-left: 6px; }
 .card h2.mt { margin-top: 22px; }
 .status { font-size: 13px; color: #5b6577; padding: 8px 0; }
 .status.err { color: #e55039; }

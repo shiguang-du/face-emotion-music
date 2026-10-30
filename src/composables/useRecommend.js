@@ -2,11 +2,16 @@
 // 歌曲推荐引擎（核心算法）
 // ----------------------------------------------------------------------------
 // 输入：@vladmandic/face-api 得到的主导情绪 key（happy / sad / angry ...）
-// 步骤：
+// 输出：**离线（本地曲库）+ 在线（音乐接口）** 两路推荐
+//
+// 离线推荐：完全在浏览器内完成，断网也能用
 //   1. 取该情绪在 emotionProfile 中定义的"目标画像"(energy/valence/danceability/tags/genres)
-//   2. 本地曲库打分：对每首歌用加权距离公式算匹配分(0~100)，取 TopN
-//   3. 在线接口：用情绪的搜索词请求在线 API，得到可播放直链（失败则跳过）
-//   4. 返回 { local, online } 两部分推荐列表，UI 分别展示
+//   2. 对本地曲库每首歌用加权距离公式算匹配分(0~100)，取 TopN
+//
+// 在线推荐：按情绪关键词请求在线接口，拿可播放直链
+//   1. 主源 GD Studio（网易云）：关键词搜索 → 逐首解析 320kbps 直链
+//   2. 备源 Meting：热歌榜歌单兜底
+//   3. 全部失败时 onlineStatus='empty'，离线歌单仍然可用（降级不影响主流程）
 //
 // 打分公式（song 与 target 各特征越接近分越高，再加标签/曲风重合加分）：
 //   score = 0.35*(1-|Δenergy|) + 0.35*(1-|Δvalence|) + 0.15*(1-|Δdanceability|)
@@ -20,6 +25,8 @@ import { searchOnline } from '../services/onlineMusicApi.js'
 import localData from '../../public/data/localSongs.json'
 
 const localSongs = localData.songs || []
+
+const ONLINE_LIMIT = 5
 
 function scoreSong(song, target) {
   const e = song.energy ?? 0.5
@@ -52,6 +59,10 @@ export function useRecommend() {
   const error = ref('')
   const lastEmotion = ref('')
 
+  // 在线推荐状态：idle | loading | ok | empty
+  const onlineStatus = ref('idle')
+  const onlineKeyword = ref('')
+
   // 推荐策略：'auto' | 'mirror' | 'repair'（默认智能）
   const strategy = ref('auto')
   // 本次实际生效的策略（智能会被解析为 mirror 或 repair）
@@ -72,7 +83,7 @@ export function useRecommend() {
     loading.value = true
     error.value = ''
 
-    // 1) 本地曲库打分排序（使用策略解析后的 target）
+    // 1) 离线推荐：本地曲库打分排序（同步完成，断网可用）
     const scored = localSongs
       .map((s) => {
         const score = scoreSong(s, target)
@@ -82,17 +93,47 @@ export function useRecommend() {
       .sort((a, b) => b.score - a.score)
     localList.value = scored.slice(0, opts.localTop || 6)
 
-    // 2) 在线接口（关键词取情绪画像第一个搜索词）
-    const keyword = profile.keywords[0]
-    const online = await searchOnline(keyword, { timeout: opts.timeout || 8000 })
-    onlineList.value = online.map((s, i) => ({
-      ...s,
-      score: 70 - i * 3, // 意图匹配，置信度略低于本地精准匹配
-      source: 'online',
-      reason: `在线 · 按「${keyword}」匹配`
-    }))
+    // 2) 在线推荐：按情绪关键词请求在线接口（失败自动降级，不阻塞离线歌单）
+    await loadOnline(profile.keywords[0], opts)
 
     loading.value = false
+  }
+
+  // 单独加载/重试在线推荐
+  async function loadOnline(keyword, opts = {}) {
+    const kw = String(keyword || '').trim()
+    onlineKeyword.value = kw
+    if (!kw) {
+      onlineList.value = []
+      onlineStatus.value = 'empty'
+      return
+    }
+    onlineStatus.value = 'loading'
+    const online = await searchOnline(kw, {
+      limit: opts.onlineTop || ONLINE_LIMIT,
+      timeout: opts.timeout || 8000
+    })
+    onlineList.value = online.map((s, i) => ({
+      ...s,
+      // 在线为关键词意图匹配，置信度略低于本地精准打分
+      score: Math.max(55, 78 - i * 4),
+      reason: `在线 · 关键词「${kw}」`
+    }))
+    onlineStatus.value = onlineList.value.length ? 'ok' : 'empty'
+  }
+
+  // 重试在线推荐（保持当前情绪）
+  async function refreshOnline() {
+    if (!lastEmotion.value) return
+    const profile = EMOTIONS[lastEmotion.value]
+    if (!profile) return
+    const wasLoading = loading.value
+    loading.value = true
+    try {
+      await loadOnline(profile.keywords[0])
+    } finally {
+      loading.value = wasLoading
+    }
   }
 
   function buildReason(song, profile, mode) {
@@ -119,6 +160,9 @@ export function useRecommend() {
     strategy,
     resolvedMode,
     setStrategy,
+    onlineStatus,
+    onlineKeyword,
+    refreshOnline,
     STRATEGIES
   }
 }
