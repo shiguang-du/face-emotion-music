@@ -17,7 +17,10 @@ import { ref } from 'vue'
 // tfjs 的 webgl/cpu 后端，避免后端未注册的运行时报错。模型权重与原版通用。
 import * as faceapi from '@vladmandic/face-api'
 
-const MODEL_URL = '/models'
+// 必须基于 BASE_URL（vite base）拼接：GitHub Pages 部署在 /<repo>/ 子路径下，
+// 写死 '/models' 会请求到 https://<user>.github.io/models/... 导致 404。
+// dev 下 BASE_URL='/' -> '/models'；build 下 BASE_URL='./' -> './models'
+const MODEL_URL = `${import.meta.env.BASE_URL}models`
 
 export function useFaceEmotion() {
   const modelsLoaded = ref(false)

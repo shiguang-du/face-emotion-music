@@ -97,7 +97,7 @@ const modes = [
   { key: 'photo', label: '拍照', icon: '📸' }
 ]
 
-// 7 种情绪的真实示例人脸（public/demo-faces/<key>/<key>.png）
+// 7 种情绪的真实示例人脸（public/demo-faces/<key>/<key>.jpg，640px 压缩版，约 70KB/张）
 const demoFaces = [
   { key: 'neutral', label: '平静', emoji: '😐' },
   { key: 'happy', label: '开心', emoji: '😄' },
@@ -109,7 +109,7 @@ const demoFaces = [
 ]
 
 function demoSrc(key) {
-  return `${import.meta.env.BASE_URL}demo-faces/${key}/${key}.png`
+  return `${import.meta.env.BASE_URL}demo-faces/${key}/${key}.jpg`
 }
 
 const mode = ref('demo')

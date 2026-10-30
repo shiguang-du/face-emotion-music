@@ -1,6 +1,6 @@
 <template>
   <div class="player" :class="{ active: song }">
-    <img v-if="song?.cover" class="pc" :src="song.cover" alt="" />
+    <img v-if="song?.cover" class="pc" :src="assetUrl(song.cover)" alt="" />
     <span v-else class="pc">{{ song ? song.title.slice(0, 1) : '♪' }}</span>
 
     <div class="info">
@@ -19,6 +19,7 @@
 
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
+import { assetUrl } from '../services/asset.js'
 
 const props = defineProps({
   song: { type: Object, default: null }
@@ -46,7 +47,8 @@ watch(
   (s) => {
     if (!s) return
     const a = ensureAudio()
-    a.src = s.url || s.file
+    // 本地曲库里的 file 形如 "/music/song-1.mp3"，必须按部署基路径解析，否则子路径部署 404
+    a.src = assetUrl(s.url || s.file)
     a.currentTime = 0
     progress.value = 0
     a.play().catch((e) => console.warn('播放失败：', e.message))
