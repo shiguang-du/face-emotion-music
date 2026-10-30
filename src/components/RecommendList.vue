@@ -24,42 +24,14 @@
 
     <!-- 双路来源汇总 -->
     <div class="sources">
-      <span class="src"><b>{{ localList.length }}</b> 首离线</span>
-      <span class="dot">·</span>
       <span class="src">
         <b>{{ onlineStatus === 'ok' ? onlineList.length : 0 }}</b> 首在线
       </span>
+      <span class="dot">·</span>
+      <span class="src"><b>{{ localList.length }}</b> 首离线</span>
     </div>
 
-    <!-- ① 离线推荐：本地曲库，断网可用 -->
-    <section v-if="localList.length" class="sec">
-      <h3>
-        <span class="tag offline">💾 离线</span>
-        本地曲库推荐
-        <small>{{ localList.length }} 首 · 断网可用</small>
-      </h3>
-      <ul>
-        <li
-          v-for="s in localList"
-          :key="s.id"
-          :class="{ playing: s.id === currentId }"
-          @click="$emit('play', s)"
-        >
-          <span class="cover local" :style="grad(s)">{{ s.title.slice(0, 1) }}</span>
-          <div class="meta">
-            <div class="title">{{ s.title }}</div>
-            <div class="sub">{{ s.artist }} · {{ s.reason }}</div>
-          </div>
-          <div class="score">
-            <div class="num">{{ s.score }}</div>
-            <div class="cap">匹配分</div>
-          </div>
-          <button class="play" @click.stop="$emit('play', s)">▶</button>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ② 在线推荐：在线音乐接口，实时解析直链 -->
+    <!-- ① 在线推荐：在线音乐接口，实时解析直链 -->
     <section class="sec">
       <h3>
         <span class="tag online">🌐 在线</span>
@@ -103,6 +75,34 @@
             <div class="title">{{ s.title }}</div>
             <div class="sub">{{ s.artist }}<template v-if="s.album"> · {{ s.album }}</template></div>
             <div class="sub reason">{{ s.reason }}</div>
+          </div>
+          <div class="score">
+            <div class="num">{{ s.score }}</div>
+            <div class="cap">匹配分</div>
+          </div>
+          <button class="play" @click.stop="$emit('play', s)">▶</button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ② 离线推荐：本地曲库，断网可用 -->
+    <section v-if="localList.length" class="sec">
+      <h3>
+        <span class="tag offline">💾 离线</span>
+        本地曲库推荐
+        <small>{{ localList.length }} 首 · 断网可用</small>
+      </h3>
+      <ul>
+        <li
+          v-for="s in localList"
+          :key="s.id"
+          :class="{ playing: s.id === currentId }"
+          @click="$emit('play', s)"
+        >
+          <span class="cover local" :style="grad(s)">{{ s.title.slice(0, 1) }}</span>
+          <div class="meta">
+            <div class="title">{{ s.title }}</div>
+            <div class="sub">{{ s.artist }} · {{ s.reason }}</div>
           </div>
           <div class="score">
             <div class="num">{{ s.score }}</div>

@@ -1,7 +1,33 @@
 <template>
   <div class="app">
     <header class="top">
-      <h1>🎭 人脸情绪识歌 <span>Face Emotion Music</span></h1>
+      <h1>
+        <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+          <defs>
+            <linearGradient id="emLogoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6c5ce7" />
+              <stop offset="55%" stop-color="#8e6ff0" />
+              <stop offset="100%" stop-color="#c86bd8" />
+            </linearGradient>
+            <radialGradient id="emLogoShine" cx="30%" cy="16%" r="72%">
+              <stop offset="0%" stop-color="#fff" stop-opacity=".42" />
+              <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="12" fill="url(#emLogoGrad)" />
+          <rect width="40" height="40" rx="12" fill="url(#emLogoShine)" />
+          <!-- 符头即笑脸：情绪 + 音乐 -->
+          <circle cx="15.2" cy="26" r="7.6" fill="#fff" />
+          <circle cx="12.5" cy="24.1" r="1.35" fill="#6c5ce7" />
+          <circle cx="17.9" cy="24.1" r="1.35" fill="#6c5ce7" />
+          <path d="M12.3 27.4c1.6 2.1 4.2 2.1 5.8 0" stroke="#6c5ce7" stroke-width="1.6" stroke-linecap="round" fill="none" />
+          <!-- 符干 + 符尾 -->
+          <rect x="21.2" y="9.4" width="2.9" height="16.6" rx="1.45" fill="#fff" />
+          <path d="M24.1 9.4c4.6.5 7.5 3 7.5 6.8 0 1.2-.3 2.3-.9 3.2-.7-2.7-2.9-4.6-6.6-5.1z" fill="#fff" />
+        </svg>
+        <span class="brand-text">人脸情绪识歌</span>
+        <span class="en">Face Emotion Music</span>
+      </h1>
       <p class="tagline">本地人脸情绪识别 → 情绪画像 → 歌曲推荐（本地曲库 + 在线接口）</p>
     </header>
 
@@ -117,8 +143,13 @@ onBeforeUnmount(() => stopLoop())
 
 <style scoped>
 .app { max-width: 1080px; margin: 0 auto; padding: 24px 18px 40px; }
-.top h1 { font-size: 24px; margin: 0; }
-.top h1 span { font-size: 14px; color: #8b93a7; font-weight: 400; margin-left: 8px; }
+.top h1 { font-size: 24px; margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.top .logo {
+  width: 34px; height: 34px; flex: 0 0 34px; border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(108,92,231,.30);
+}
+.top h1 .brand-text { letter-spacing: .3px; }
+.top h1 .en { font-size: 14px; color: #8b93a7; font-weight: 400; }
 .tagline { color: #5b6577; margin: 6px 0 0; font-size: 14px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
 @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
