@@ -45,6 +45,27 @@ function scoreSong(song, target) {
   return Math.round((dist + 0.1 * tagScore + 0.05 * genreScore) * 100)
 }
 
+// 多样性重排：同一曲风最多连排 2 首，避免歌单同质化（Still keeping 得分序为主）
+function diversify(list, topN) {
+  const out = []
+  const pool = [...list]
+  let lastKey = ''
+  let streak = 0
+  while (out.length < topN && pool.length) {
+    let idx = pool.findIndex((s) => {
+      const key = (s.genres && s.genres[0]) || s.artist || ''
+      return key !== lastKey || streak < 2
+    })
+    if (idx === -1) idx = 0
+    const pick = pool.splice(idx, 1)[0]
+    const key = (pick.genres && pick.genres[0]) || pick.artist || ''
+    streak = key === lastKey ? streak + 1 : 1
+    lastKey = key
+    out.push(pick)
+  }
+  return out
+}
+
 export function useRecommend() {
   const localList = ref([])
   const onlineList = ref([])
@@ -80,7 +101,7 @@ export function useRecommend() {
         return { ...s, score, source: 'local', reason }
       })
       .sort((a, b) => b.score - a.score)
-    localList.value = scored.slice(0, opts.localTop || 6)
+    localList.value = diversify(scored, opts.localTop || 6)
 
     // 2) 在线接口（关键词取情绪画像第一个搜索词）
     const keyword = profile.keywords[0]
@@ -119,6 +140,7 @@ export function useRecommend() {
     strategy,
     resolvedMode,
     setStrategy,
+    localTotal: localSongs.length,
     STRATEGIES
   }
 }

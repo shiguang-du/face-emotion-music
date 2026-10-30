@@ -16,16 +16,19 @@ export const STRATEGIES = [
   {
     key: 'auto',
     label: '智能',
+    icon: '✨',
     desc: '智能：愉悦度低于 -0.15 时自动切换到「情绪修复」，否则使用「同频镜像」。'
   },
   {
     key: 'mirror',
     label: '同频镜像',
+    icon: '🪞',
     desc: '同频镜像：让音乐情感坐标尽量贴近你此刻的情绪，适合共鸣式聆听。'
   },
   {
     key: 'repair',
     label: '情绪修复',
+    icon: '🌱',
     desc: '情绪修复：以 0.62 的步长把目标坐标推向该情绪的修复锚点，用于消极情绪的疏导。'
   }
 ]
