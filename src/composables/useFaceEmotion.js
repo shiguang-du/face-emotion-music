@@ -56,20 +56,93 @@ export function useFaceEmotion() {
     }
   }
 
+  // 把输入（图片 / 视频帧 / canvas）绘制到离屏 canvas；enhance=true 时对暗图做提亮 + 轻度对比拉伸。
+  // 目的：暗光/逆光照片在原图直接检测时特征太弱，容易漏检；提亮后 tinyFaceDetector 更易检出。
+  function drawToCanvas(input, enhance) {
+    try {
+      const w = input.videoWidth || input.naturalWidth || input.width || 0
+      const h = input.videoHeight || input.naturalHeight || input.height || 0
+      if (!w || !h) return null
+      const c = document.createElement('canvas')
+      c.width = w
+      c.height = h
+      const ctx = c.getContext('2d', { willReadFrequently: true })
+      ctx.drawImage(input, 0, 0, w, h)
+      if (enhance) {
+        const img = ctx.getImageData(0, 0, w, h)
+        const d = img.data
+        let sum = 0
+        for (let i = 0; i < d.length; i += 4) {
+          sum += d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114
+        }
+        const mean = sum / (d.length / 4) // 0~255 平均亮度
+        if (mean < 120) {
+          // 越暗给越强的 gamma 提亮（上限 2.4），再叠加 8% 对比度，避免整片发灰
+          const gamma = Math.min(2.4, Math.max(1.0, 120 / Math.max(mean, 25)))
+          const lut = new Uint8ClampedArray(256)
+          for (let v = 0; v < 256; v++) {
+            let out = Math.pow(v / 255, 1 / gamma) * 255
+            out = (out - 128) * 1.08 + 128
+            lut[v] = out < 0 ? 0 : out > 255 ? 255 : out
+          }
+          for (let i = 0; i < d.length; i += 4) {
+            d[i] = lut[d[i]]
+            d[i + 1] = lut[d[i + 1]]
+            d[i + 2] = lut[d[i + 2]]
+          }
+          ctx.putImageData(img, 0, 0)
+        }
+      }
+      return c
+    } catch (e) {
+      // 跨域污染等情况：退化为直接使用原输入
+      return null
+    }
+  }
+
   // 对单帧（图片 / 视频当前帧 / canvas）做情绪识别
-  async function detect(input) {
+  // opts:
+  //   retry   —— 默认 true：未检出时按「参数阶梯」逐级放宽重试（仅用于单张图片，勿用于实时循环）
+  //   enhance —— 默认 true：检测前对暗图自动提亮（同上，实时循环应关闭以保证帧率）
+  async function detect(input, opts = {}) {
     if (!modelsLoaded.value) {
       const ok = await initModels()
       if (!ok) return null
     }
-    const options = new faceapi.TinyFaceDetectorOptions({
-      inputSize: 224,
-      scoreThreshold: 0.5
-    })
-    const result = await faceapi
-      .detectSingleFace(input, options)
-      .withFaceExpressions()
 
+    // 暗光增强：仅当输入是 <img>/<video>/<canvas> 时生效
+    let src = input
+    if (opts.enhance !== false) {
+      const c = drawToCanvas(input, true)
+      if (c) src = c
+    }
+
+    const run = (inputSize, scoreThreshold) =>
+      faceapi
+        .detectSingleFace(src, new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold }))
+        .withFaceExpressions()
+
+    // 参数阶梯：从严到宽。暗光/侧脸/紧锁眉在小输入严阈值下常漏检，
+    // 逐级「放大输入 + 降低人脸分阈值」能显著提升命中率（首级仍保留原行为）。
+    const ladder =
+      opts.retry === false
+        ? [[opts.inputSize || 224, opts.scoreThreshold ?? 0.5]]
+        : [
+            [opts.inputSize || 224, opts.scoreThreshold ?? 0.5],
+            [416, 0.3],
+            [512, 0.2],
+            [608, 0.12]
+          ]
+
+    let result = null
+    for (const [size, thr] of ladder) {
+      try {
+        result = await run(size, thr)
+      } catch (e) {
+        result = null
+      }
+      if (result) break
+    }
     if (!result) return null
 
     const expressions = result.expressions // 形如 {neutral:0.1, happy:0.8, ...}
@@ -90,7 +163,8 @@ export function useFaceEmotion() {
     loopTimer = setInterval(async () => {
       if (videoEl.readyState < 2) return
       try {
-        const res = await detect(videoEl)
+        // 实时循环关闭「阶梯重试」与「暗光提亮」：每帧只跑一次推理，保证流畅度
+        const res = await detect(videoEl, { retry: false, enhance: false })
         if (res) onResult(res)
       } catch (e) {
         /* 单帧失败忽略，继续下一帧 */
