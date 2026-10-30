@@ -8,6 +8,8 @@
 ### 部署方式（GitHub Pages）
 - `.github/workflows/deploy.yml`：push 到 `main` 后自动构建并发布到 Pages。
 - `vite.config.js` 使用相对基路径 `base: './'`，在 `/<repo>/` 子路径下资源可正确加载。
+- **所有 `public/` 下的资源（`models` / `music` / `demo-faces` / `data`）必须用 `import.meta.env.BASE_URL` 拼接**（见 `src/services/asset.js` 的 `assetUrl()`），
+  绝对不要写死 `/models` 这种以斜杠开头的路径——那会请求到域名根目录 `https://<user>.github.io/models/...` 并返回 404。
 - 首次需在仓库 Settings → Pages 中把 Source 设为 **GitHub Actions**（已自动配置）。
 
 ---
