@@ -3,11 +3,11 @@
 // ----------------------------------------------------------------------------
 // 引擎：@vladmandic/face-api（face-api.js 的活跃维护分支，基于 TensorFlow.js，模型与推理全部在浏览器本地完成，无服务端调用）
 // 模型：
-//   - tinyFaceDetector : 轻量人脸检测（SSD 精简版，输入 320×320 / 416×416，速度快）
+//   - tinyFaceDetector : 轻量人脸检测（SSD 精简版，输入 224×224，速度快）
 //   - faceExpressionNet: 表情分类，输出 7 类情绪概率
 // 算法流程：
 //   1. 加载模型权重（public/models，随包发布，离线可用）
-//   2. 用 tinyFaceDetector 检测人脸框（scoreThreshold 可调 = UI 的「检测灵敏度」）
+//   2. 用 tinyFaceDetector 检测人脸框
 //   3. withFaceExpressions() 在人脸框上跑 faceExpressionNet，得到 7 类概率
 //   4. 取概率最大的类别作为"主导情绪"，返回完整概率分布
 // ============================================================================
@@ -26,8 +26,6 @@ export function useFaceEmotion() {
   const modelsLoaded = ref(false)
   const loadingModels = ref(false)
   const initError = ref('')
-  // 实际使用的推理后端：webgl（GPU 加速）或 cpu（回退）
-  const backend = ref('')
   let loopTimer = null
 
   async function initModels() {
@@ -38,10 +36,8 @@ export function useFaceEmotion() {
       // 优先 WebGL 后端（GPU 加速），失败回退 CPU
       try {
         await faceapi.tf.setBackend('webgl')
-        backend.value = 'webgl'
       } catch (e) {
         await faceapi.tf.setBackend('cpu')
-        backend.value = 'cpu'
       }
       await faceapi.tf.ready()
 
@@ -60,41 +56,19 @@ export function useFaceEmotion() {
     }
   }
 
-  /**
-   * 对单帧（图片 / 视频当前帧 / canvas）做情绪识别
-   * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement} input
-   * @param {{scoreThreshold?: number, inputSize?: number}} opts
-   *        scoreThreshold 越小越灵敏（0.2~0.9），inputSize 越大越准但越慢
-   */
-  async function detect(input, opts = {}) {
+  // 对单帧（图片 / 视频当前帧 / canvas）做情绪识别
+  async function detect(input) {
     if (!modelsLoaded.value) {
       const ok = await initModels()
       if (!ok) return null
     }
-    const run = (inputSize, scoreThreshold) => {
-      const options = new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold })
-      return faceapi.detectSingleFace(input, options).withFaceExpressions()
-    }
-    const reqSize = opts.inputSize || 320
-    const reqThr = opts.scoreThreshold ?? 0.6
-
-    // 兜底重试阶梯：部分示例/小脸在 320@0.6 下人脸分偏低会被判为"未检测到"，
-    // 依次用更大输入 + 更低阈值再试，显著提升命中率。仅在单侧识别（图片/示例）时生效，
-    // 实时摄像头循环传入 retry:false，避免每帧多次推理拖慢帧率。
-    const ladder = [
-      { inputSize: reqSize, scoreThreshold: reqThr },
-      { inputSize: 512, scoreThreshold: 0.3 },
-      { inputSize: 608, scoreThreshold: 0.15 }
-    ]
-    let result = null
-    for (const a of ladder) {
-      if (a.inputSize === reqSize && a.scoreThreshold === reqThr && result === null) {
-        result = await run(reqSize, reqThr)
-      } else if (opts.retry !== false) {
-        result = await run(a.inputSize, a.scoreThreshold)
-      }
-      if (result) break
-    }
+    const options = new faceapi.TinyFaceDetectorOptions({
+      inputSize: 224,
+      scoreThreshold: 0.5
+    })
+    const result = await faceapi
+      .detectSingleFace(input, options)
+      .withFaceExpressions()
 
     if (!result) return null
 
@@ -106,20 +80,17 @@ export function useFaceEmotion() {
       expressions: expressions,
       sorted: sorted,
       dominant: dominant,
-      box: box,
-      score: result.detection?.score ?? 0,
-      inputSize: opts.inputSize || 320
+      box: box
     }
   }
 
   // 对视频流持续识别（用于实时摄像头）
-  function startLoop(videoEl, onResult, opts = {}) {
+  function startLoop(videoEl, onResult, intervalMs = 600) {
     stopLoop()
-    const intervalMs = opts.intervalMs || 600
     loopTimer = setInterval(async () => {
       if (videoEl.readyState < 2) return
       try {
-        const res = await detect(videoEl, opts)
+        const res = await detect(videoEl)
         if (res) onResult(res)
       } catch (e) {
         /* 单帧失败忽略，继续下一帧 */
@@ -134,5 +105,5 @@ export function useFaceEmotion() {
     }
   }
 
-  return { modelsLoaded, loadingModels, initError, backend, initModels, detect, startLoop, stopLoop }
+  return { modelsLoaded, loadingModels, initError, initModels, detect, startLoop, stopLoop }
 }

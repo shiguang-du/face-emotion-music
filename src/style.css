@@ -1,105 +1,11 @@
-/* ============================================================================
-   全局样式 / 设计变量
-   ----------------------------------------------------------------------------
-   轻暖灰底 + 白色卡片 + 深色品牌块/播放条，紫色作为唯一强调色。
-   ========================================================================== */
-
-:root {
-  --bg: #f4f3f0;
-  --card: #ffffff;
-  --line: #e8e6e1;
-  --line-soft: #f0eeea;
-  --ink: #1b1c1e;
-  --ink-2: #4c4d50;
-  --muted: #93938d;
-  --muted-2: #b3b3ad;
-  --accent: #6c5ce7;
-  --accent-ink: #5a4bd6;
-  --accent-soft: #efeaff;
-  --dark: #161719;
-  --dark-2: #222326;
-  --danger: #e05248;
-  --ok: #2fa36b;
-  --radius: 16px;
-  --shadow: 0 1px 2px rgba(26, 26, 26, .04), 0 8px 24px rgba(26, 26, 26, .035);
-}
-
 * { box-sizing: border-box; }
-
 html, body { margin: 0; padding: 0; }
-
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(180deg, #f5f8ff 0%, #eef2f9 100%);
+  color: #2d3748;
   min-height: 100vh;
 }
-
 #app { min-height: 100vh; }
-
 button { font-family: inherit; }
-
-/* 细滚动条 */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #dcdad4; border-radius: 8px; }
-::-webkit-scrollbar-thumb:hover { background: #cbc9c3; }
-::-webkit-scrollbar-track { background: transparent; }
-
-/* 通用卡片 */
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-/* 卡片头：编号 + 标题 + 副标题 + 右侧动作 */
-.card-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px 12px;
-  flex-wrap: wrap;
-}
-.card-no {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-radius: 7px;
-  padding: 3px 7px;
-  line-height: 1.3;
-}
-.card-title { font-size: 14px; font-weight: 650; letter-spacing: .01em; }
-.card-sub {
-  font-size: 10.9px;
-  color: var(--muted);
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.card-head .grow { flex: 1; }
-.head-chip {
-  font-size: 11.5px;
-  color: var(--ink-2);
-  background: #f7f6f3;
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  padding: 4px 10px;
-  white-space: nowrap;
-}
-.head-link {
-  font-size: 11.5px;
-  color: var(--accent);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 2px 0;
-  white-space: nowrap;
-}
-.head-link:hover { text-decoration: underline; }
