@@ -7,7 +7,19 @@
         :class="{ active: mode === m.key }"
         @click="switchMode(m.key)"
       >
-        {{ m.icon }} {{ m.label }}
+        <template v-if="m.svg">
+          <svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8.6V6.7A2.7 2.7 0 0 1 6.7 4h1.9" />
+            <path d="M15.4 4h1.9A2.7 2.7 0 0 1 20 6.7v1.9" />
+            <path d="M20 15.4v1.9a2.7 2.7 0 0 1-2.7 2.7h-1.9" />
+            <path d="M8.6 20H6.7A2.7 2.7 0 0 1 4 17.3v-1.9" />
+            <circle class="fill-dot" cx="9.4" cy="10.5" r="1.05" />
+            <circle class="fill-dot" cx="14.6" cy="10.5" r="1.05" />
+            <path d="M9.15 13.25Q12 16.75 14.85 13.25" />
+          </svg>
+        </template>
+        <span v-else class="tab-emoji">{{ m.icon }}</span>
+        <span>{{ m.label }}</span>
       </button>
     </div>
 
@@ -90,7 +102,8 @@ import { ref, computed, onBeforeUnmount } from 'vue'
 
 const emit = defineEmits(['capture', 'stream', 'stop'])
 const modes = [
-  { key: 'demo', label: '示例人脸', icon: '🎭' },
+  // 示例人脸用矢量图标（取景框 + 笑脸），避免不同系统 emoji 字体差异
+  { key: 'demo', label: '示例人脸', svg: true },
   { key: 'image', label: '图片', icon: '🖼' },
   { key: 'video', label: '视频', icon: '🎞' },
   { key: 'camera', label: '实时摄像头', icon: '📹' },
@@ -252,9 +265,17 @@ onBeforeUnmount(stopCamera)
 .tabs button {
   border: 1px solid #d9dee5; background: #fff; color: #4a5568;
   padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 14px;
+  display: inline-flex; align-items: center; gap: 5px;
   transition: all .15s;
 }
 .tabs button.active { background: #3b6cf6; color: #fff; border-color: #3b6cf6; }
+.tab-emoji { line-height: 1; }
+.tab-ico {
+  width: 16px; height: 16px; flex: 0 0 16px; overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: 1.85;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.tab-ico .fill-dot { fill: currentColor; stroke: none; }
 .stage {
   position: relative; width: 100%; aspect-ratio: 4/3; background: #0f1320;
   border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;

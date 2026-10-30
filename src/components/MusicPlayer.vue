@@ -223,10 +223,12 @@ onBeforeUnmount(() => {
   gap: 14px;
   padding: 10px 16px;
   border-radius: 14px;
-  background: #16171a;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, .07);
-  box-shadow: 0 14px 44px rgba(0, 0, 0, .34);
+  background: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  color: #2d3748;
+  border: 1px solid #e6ecf7;
+  box-shadow: 0 10px 30px rgba(56, 80, 130, .13), 0 2px 6px rgba(56, 80, 130, .06);
 }
 
 /* 曲目 */
@@ -236,54 +238,58 @@ onBeforeUnmount(() => {
   display: flex; align-items: center; justify-content: center; overflow: hidden;
   background: linear-gradient(135deg, #6c5ce7, #9b6ef3);
   color: #fff; font-size: 17px; font-weight: 700;
+  box-shadow: 0 3px 10px rgba(108, 92, 231, .22);
 }
 .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .meta { min-width: 0; }
-.meta .title { font-size: 13.5px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta .sub { font-size: 11.5px; color: #9aa0a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-.meta .err { font-size: 11px; color: #ff6b6b; margin-top: 2px; }
+.meta .title { font-size: 13.5px; font-weight: 600; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta .sub { font-size: 11.5px; color: #8b93a7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.meta .err { font-size: 11px; color: #e55039; margin-top: 2px; }
 
 /* 控制 */
 .controls { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
 .ico {
-  width: 30px; height: 30px; border: none; background: transparent; color: #cfd3da;
+  width: 30px; height: 30px; border: none; background: transparent; color: #6b7a90;
   display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px;
   transition: color .15s, background .15s;
 }
-.ico:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.ico:hover { color: #3b6cf6; background: #eef3fd; }
 .ico svg { width: 16px; height: 16px; fill: currentColor; }
 .vol svg path:not(:first-child) {
   fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round;
 }
 .main {
   width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
-  background: #fff; color: #16171a; margin: 0 4px;
+  background: linear-gradient(135deg, #3b6cf6, #6c5ce7); color: #fff; margin: 0 4px;
   display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(70, 96, 220, .32);
+  transition: transform .15s, box-shadow .15s;
 }
 .main svg { width: 16px; height: 16px; fill: currentColor; }
-.main:hover { transform: scale(1.04); }
+.main:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(70, 96, 220, .4); }
 
 /* 进度 */
-.time { font-size: 11.5px; color: #9aa0a6; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+.time { font-size: 11.5px; color: #8b93a7; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
 .bar {
-  flex: 1 1 auto; height: 4px; border-radius: 999px; background: #3a3c42;
+  flex: 1 1 auto; height: 4px; border-radius: 999px; background: #e6ecf5;
   position: relative; cursor: pointer; margin: 0 2px;
 }
-.bar:hover { background: #45474e; }
+.bar:hover { background: #d9e2f0; }
 .fill {
   position: relative; height: 100%; border-radius: 999px;
-  background: #fff; transition: width .12s linear;
+  background: linear-gradient(90deg, #3b6cf6, #8e6ff0);
+  transition: width .12s linear;
 }
 .knob {
   position: absolute; right: -4px; top: 50%; transform: translateY(-50%);
   width: 9px; height: 9px; border-radius: 50%; background: #fff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .12);
+  box-shadow: 0 0 0 2.5px #6c5ce7, 0 2px 6px rgba(80, 70, 160, .3);
 }
 
 /* 音量 */
 .volume { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
 .vol-range {
-  width: 74px; accent-color: #fff; cursor: pointer; height: 4px;
+  width: 74px; accent-color: #6c5ce7; cursor: pointer; height: 4px;
 }
 
 @media (max-width: 860px) {
